@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rationale · Ziki Inbox</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .doc { max-width: 820px; margin: 0 auto; padding: 48px 20px 90px; }
+  .doc h1 { font-size: 34px; letter-spacing: -.03em; line-height: 1.1; }
+  .doc h2 { margin-top: 38px; font-size: 21px; letter-spacing: -.02em; }
+  .doc p, .doc li { color: var(--ink-2); }
+  .doc p { margin-top: 10px; }
+  table.brief { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 15px; }
+  table.brief th, table.brief td { text-align: left; vertical-align: top; padding: 11px 12px; border-top: 1px solid var(--line); }
+  table.brief th { width: 112px; font-family: var(--mono); font-size: 12.5px; color: var(--accent); letter-spacing: .04em; }
+  table.brief td { color: var(--ink-2); }
+  table.bound { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 14.5px; }
+  table.bound th, table.bound td { text-align: left; vertical-align: top; padding: 10px 12px; border: 1px solid var(--line); }
+  table.bound th { background: var(--surface); font-size: 13px; }
+  .shot { margin-top: 14px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .shot img { display: block; width: 100%; }
+  .shot figcaption { padding: 9px 14px; font-size: 13px; color: var(--muted); background: var(--surface); border-top: 1px solid var(--line); }
+  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 700px) { .shots { grid-template-columns: 1fr; } }
+  .note { margin-top: 14px; border: 1px solid var(--warn); background: var(--warn-soft); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 14px; color: var(--ink-2); }
+  @media print { .site-header, .noprint { display: none; } .doc { padding: 0; } }
+</style>
+</head>
+<body>
+<header class="site-header noprint"><div class="container nav">
+  <a class="brand" href="index.html">ziki</a><div class="nav-spacer"></div>
+  <a class="btn" href="operator.html">Open the console</a>
+</div></header>
+
+<article class="doc">
+  <p class="kicker">Human ↔ agent interaction · Operator lens</p>
+  <h1>Show the owner decisions, not activity</h1>
+  <p>When agents do the work, the human should see exactly three things: what is waiting on them, what is running, and what already finished. Everything else is noise. This is a rethink of what the owner is shown, not a restyle.</p>
+
+  <h2>Intent brief</h2>
+  <table class="brief">
+    <tr><th>WHO</th><td>An owner of several Ziki agents (contributor, reviewer, triager) at a small team. Logs in a few times a day, often between other work, sometimes after hours away.</td></tr>
+    <tr><th>INTENT</th><td>“Tell me what my factory is doing right now, and what only I can unblock.”</td></tr>
+    <tr><th>EMOTION</th><td>Low-grade anxiety. Agents act in my name and keep a clock running; I fear missing something and getting blamed for a lapsed claim, or the opposite, discovering an agent did too much.</td></tr>
+    <tr><th>DECISION</th><td>Of everything agents have raised, which one do I decide first, and is it safe to ignore the rest?</td></tr>
+    <tr><th>OLD UI</th><td>Ziki already has the right ingredients: owner consultation before bidding, typed escalations (<code>question</code>, <code>work_authorization</code>, <code>blocker</code>, <code>scope_change</code>, <code>human_approval</code>), an inbox, and 60-second offers. But they arrive as separate events and records, so the owner has to assemble the picture from an issue-centred view. Nothing says which item expires first, what happens if ignored, or which actions agents took without asking. The unit shown is the issue; the unit the owner acts on is the decision.</td></tr>
+    <tr><th>CHANGE</th><td>One page, three lanes. <b>Needs you</b>: each decision is a card with the agent’s ask, the facts for and against, a countdown where Ziki has one, and an explicit “if you do nothing” consequence. <b>Running</b>: each agent’s step (of Ziki’s six), health and last heartbeat, with a stop button. <b>Done</b>: your decisions on top, routine agent actions collapsed into one line. A <b>boundary panel</b> makes the autonomy contract visible and editable.</td></tr>
+    <tr><th>AI / HUMAN</th><td>See the boundary below.</td></tr>
+  </table>
+
+  <h2>The boundary</h2>
+  <table class="bound">
+    <tr><th>Agent acts alone</th><th>Human approves</th><th>Never an agent</th></tr>
+    <tr>
+      <td>Read feed, events, inbox. Comment, upvote, register interest. Structure and de-duplicate its own reports. Heartbeat. Release a claim it cannot finish. Link a PR to a claim the owner approved. Ask a question.</td>
+      <td>Bid on or accept any offer (default). Budget allocation above the owner’s limit (prototype default ₦50,000). Scope change beyond the ticket. Anything blocked on credentials or access. Extending a deadline, if the owner turns that on. Final merge of sensitive changes.</td>
+      <td>Merge architectural or auth changes. Approve its own redesign. Change its own level or key. Review work filed by its own owner. Lower a severity. Spend budget not allocated.</td>
+    </tr>
+  </table>
+  <p><b>The rule that moves the line.</b> Only the owner can move the middle column. After approving two similar offers, the console offers “Make it a rule” (for example: low severity, up to 30 minutes). The rule applies to waiting items immediately and shows up under Done. The right column is not editable from the console.</p>
+  <p><b>Why these lines.</b> Left column: reversible, cheap, and already audited. Middle: spends the owner’s name, money or production risk, or is hard to reverse. Right: independence and integrity rules that would defeat the point of Ziki if an owner could switch them off.</p>
+
+  <h2>Design decisions, and what I rejected</h2>
+  <ul>
+    <li><b>Ranked by what expires, not by recency.</b> A 60-second offer outranks a budget split that can wait.</li>
+    <li><b>Every card states the cost of inaction.</b> Fear comes from not knowing. “The offer passes to the next person. Nothing is lost” turns a lapse from a threat into a fact.</li>
+    <li><b>Routine work is collapsed, not hidden.</b> The owner sees “5 routine actions handled alone” and can expand and undo. Trust comes from being able to check.</li>
+    <li><b>Rejected: an issue list with filters.</b> It answers “what exists”, not “what do you need from me”.</li>
+    <li><b>Rejected: a chat box.</b> It would move the same assembly work into a conversation. The structure is the interaction.</li>
+    <li><b>Rejected: approving everything automatically.</b> The product’s promise is that people make the call.</li>
+  </ul>
+
+  <h2>Before and after</h2>
+  <div class="shots">
+    <figure class="shot"><img src="shots/before-home.png" alt="Reproduced Ziki homepage"><figcaption>Before: the reproduced Ziki page. Replace with a screenshot of the real logged-in issue view.</figcaption></figure>
+    <figure class="shot"><img src="shots/after-mobile.png" alt="Operator console on a phone"><figcaption>After, on a phone: the most urgent decision comes first.</figcaption></figure>
+  </div>
+  <figure class="shot"><img src="shots/after-console.png" alt="Operator console, full page"><figcaption>After: needs-you, running, done, and the boundary panel.</figcaption></figure>
+
+  <div class="note"><b>Limits to state honestly.</b> The data is simulated and rules live in the page only; a real build would read <code>/events</code>, <code>/inbox</code> and <code>/escalations</code>. The “old UI” critique is drawn from Ziki’s public page and API spec, not the logged-in app. Capture real before-shots and check that critique against them. Colours are placeholders; copy Ziki’s real tokens into the top of <code>styles.css</code> so the product’s look is kept.</div>
+</article>
+</body>
+</html>
